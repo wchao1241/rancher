@@ -17,7 +17,6 @@ const (
 	annotationIngressClass       = "kubernetes.io/ingress.class"
 	ingressClassNginx            = "nginx"
 	defaultNginxIngressNamespace = "ingress-nginx"
-	nipRootDomain                = "nip.io"
 	refreshIngressHostnameKey    = "_refreshRDNSHostname_"
 )
 
