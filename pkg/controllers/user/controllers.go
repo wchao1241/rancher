@@ -26,6 +26,7 @@ import (
 	"github.com/rancher/rancher/pkg/controllers/user/usercompose"
 	"github.com/rancher/rancher/pkg/controllers/user/workload"
 	"github.com/rancher/types/config"
+	"github.com/rancher/rancher/pkg/controllers/user/approuter"
 )
 
 func Register(ctx context.Context, cluster *config.UserContext, kubeConfigGetter common.KubeConfigGetter, clusterManager healthsyncer.ClusterControllerLifecycle) error {
@@ -48,6 +49,7 @@ func Register(ctx context.Context, cluster *config.UserContext, kubeConfigGetter
 	endpoints.Register(ctx, cluster)
 	usercompose.Register(cluster, kubeConfigGetter)
 	namespacecompose.Register(cluster, kubeConfigGetter)
+	approuter.Register(ctx, cluster)
 
 	userOnlyContext := cluster.UserOnlyContext()
 	dnsrecord.Register(ctx, userOnlyContext)
