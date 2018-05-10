@@ -5,6 +5,7 @@ import (
 
 	"github.com/rancher/rancher/pkg/controllers/management/compose/common"
 	"github.com/rancher/rancher/pkg/controllers/user/alert"
+	"github.com/rancher/rancher/pkg/controllers/user/approuter"
 	"github.com/rancher/rancher/pkg/controllers/user/dnsrecord"
 	"github.com/rancher/rancher/pkg/controllers/user/endpoints"
 	"github.com/rancher/rancher/pkg/controllers/user/externalservice"
@@ -26,7 +27,6 @@ import (
 	"github.com/rancher/rancher/pkg/controllers/user/usercompose"
 	"github.com/rancher/rancher/pkg/controllers/user/workload"
 	"github.com/rancher/types/config"
-	"github.com/rancher/rancher/pkg/controllers/user/approuter"
 )
 
 func Register(ctx context.Context, cluster *config.UserContext, kubeConfigGetter common.KubeConfigGetter, clusterManager healthsyncer.ClusterControllerLifecycle) error {

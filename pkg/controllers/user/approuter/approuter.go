@@ -1,10 +1,10 @@
 package approuter
 
 import (
-"context"
+	"context"
 
-workloadUtil "github.com/rancher/rancher/pkg/controllers/user/workload"
-"github.com/rancher/types/config"
+	workloadUtil "github.com/rancher/rancher/pkg/controllers/user/workload"
+	"github.com/rancher/types/config"
 )
 
 func Register(ctx context.Context, cluster *config.UserContext) {
