@@ -276,7 +276,7 @@ func (c *Client) getSecret() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	return string(sec.Data["token"]), string(sec.Data["fqdn"]), nil
+	return string(sec.Data["fqdn"]), string(sec.Data["token"]), nil
 }
 
 func NewClient(secrets v1.SecretInterface, secretLister v1.SecretLister, clusterName string) *Client {
