@@ -34,7 +34,7 @@ func (c *Controller) sync(key string, obj *extensionsv1beta1.Ingress) error {
 		logrus.Warnf("settings.baseRDNSServerURL is not set, dns name might not be reachable")
 	}
 
-	fqdn, _, err := c.getSecret()
+	_, fqdn, err := c.getSecret()
 	if k8serrors.IsNotFound(err) {
 		return nil
 	}
