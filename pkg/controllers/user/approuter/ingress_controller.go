@@ -3,7 +3,6 @@ package approuter
 import (
 	"fmt"
 
-	"github.com/niusmallnan/kube-rdns/setting"
 	"github.com/rancher/rancher/pkg/settings"
 	"github.com/rancher/types/apis/core/v1"
 	"github.com/rancher/types/apis/extensions/v1beta1"
@@ -11,7 +10,6 @@ import (
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
-	"strings"
 )
 
 const (
@@ -82,9 +80,9 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 	// Also need to update rules for hostname when using nginx
 	for i, rule := range newObj.Spec.Rules {
 		logrus.Debugf("Got ingress resource hostname: %s", rule.Host)
-		if strings.HasSuffix(rule.Host, setting.GetRootDomain()) {
-			newObj.Spec.Rules[i].Host = targetHostname
-		}
+		//if strings.HasSuffix(rule.Host, setting.GetRootDomain()) {
+		newObj.Spec.Rules[i].Host = targetHostname
+		//}
 	}
 
 	logrus.Debug("1111111111122222223333333")
