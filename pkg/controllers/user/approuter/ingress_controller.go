@@ -10,6 +10,8 @@ import (
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
+	"strings"
+	"github.com/niusmallnan/kube-rdns/setting"
 )
 
 const (
@@ -76,6 +78,15 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 
 	newObj := obj.DeepCopy()
 	newObj.Annotations[annotationHostname] = targetHostname
+
+	// Also need to update rules for hostname when using nginx
+	for i, rule := range newObj.Spec.Rules {
+		logrus.Debugf("Got ingress resource hostname: %s", rule.Host)
+		if strings.HasSuffix(rule.Host, setting.GetRootDomain()) {
+			newObj.Spec.Rules[i].Host = targetHostname
+		}
+	}
+
 	logrus.Debug("1111111111122222223333333")
 	if _, err := c.ingressInterface.Update(newObj); err != nil {
 		logrus.Debug("2222223333333444444")
