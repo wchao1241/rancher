@@ -20,9 +20,11 @@ var (
 		"app": "ingress-nginx",
 	}
 	renewInterval = 24 * time.Hour
+	syncInterval  = 5 * time.Minute
 )
 
 type NginxIngressController struct {
+	ctx                context.Context
 	workloadController workloadutil.CommonController
 	nodeLister         v1.NodeLister
 	podLister          v1.PodLister
@@ -32,31 +34,33 @@ type NginxIngressController struct {
 }
 
 func (n *NginxIngressController) sync(key string, obj *workloadutil.Workload) error {
-	serverURL := settings.BaseRDNSServerURL.Get()
-	if serverURL == "" { //rootDomain and serverURL need to be set when enable rdns controller
+	for range ticker.Context(n.ctx, syncInterval) {
+		serverURL := settings.BaseRDNSServerURL.Get()
+		if serverURL == "" { //rootDomain and serverURL need to be set when enable rdns controller
+			return nil
+		}
+
+		if !labels.SelectorFromSet(nginxIngressLabels).Matches(labels.Set(obj.Labels)) {
+			return nil
+		}
+
+		ips, err := n.getNginxControllerIPs()
+		if err != nil {
+			return err
+		}
+		if serverURL != n.dnsClient.GetBaseURL() {
+			n.dnsClient.SetBaseURL(serverURL)
+		}
+
+		fqdn, err := n.dnsClient.ApplyDomain(ips)
+		if err != nil {
+			logrus.WithError(err).Errorf("update fqdn [%s] to server [%s] error", fqdn, serverURL)
+			return err
+		}
+		logrus.Infof("update fqdn [%s] to server [%s] success", fqdn, serverURL)
+		n.ingressController.Enqueue("", refreshIngressHostnameKey)
 		return nil
 	}
-
-	if !labels.SelectorFromSet(nginxIngressLabels).Matches(labels.Set(obj.Labels)) {
-		return nil
-	}
-
-	ips, err := n.getNginxControllerIPs()
-	if err != nil {
-		return err
-	}
-	if serverURL != n.dnsClient.GetBaseURL() {
-		n.dnsClient.SetBaseURL(serverURL)
-	}
-
-	fqdn, err := n.dnsClient.ApplyDomain(ips)
-	if err != nil {
-		logrus.WithError(err).Errorf("update fqdn [%s] to server [%s] error", fqdn, serverURL)
-		return err
-	}
-	logrus.Infof("update fqdn [%s] to server [%s] success", fqdn, serverURL)
-	n.ingressController.Enqueue("", refreshIngressHostnameKey)
-	return nil
 }
 
 func (n *NginxIngressController) getNginxControllerIPs() ([]string, error) {

@@ -1,6 +1,7 @@
 package approuter
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/rancher/rancher/pkg/settings"
@@ -10,6 +11,7 @@ import (
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
+	"strings"
 )
 
 const (
@@ -18,9 +20,11 @@ const (
 	ingressClassNginx            = "nginx"
 	defaultNginxIngressNamespace = "ingress-nginx"
 	refreshIngressHostnameKey    = "_refreshRDNSHostname_"
+	defaultRootDomain            = "lb.rancher.cloud"
 )
 
 type Controller struct {
+	ctx                    context.Context
 	ingressInterface       v1beta1.IngressInterface
 	ingressLister          v1beta1.IngressLister
 	managementSecretLister v1.SecretLister
@@ -80,9 +84,9 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 	// Also need to update rules for hostname when using nginx
 	for i, rule := range newObj.Spec.Rules {
 		logrus.Debugf("Got ingress resource hostname: %s", rule.Host)
-		//if strings.HasSuffix(rule.Host, setting.GetRootDomain()) {
-		newObj.Spec.Rules[i].Host = targetHostname
-		//}
+		if strings.HasSuffix(rule.Host, defaultRootDomain) {
+			newObj.Spec.Rules[i].Host = targetHostname
+		}
 	}
 
 	logrus.Debug("1111111111122222223333333")

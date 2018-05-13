@@ -12,6 +12,7 @@ func Register(ctx context.Context, cluster *config.UserContext) {
 	secretLister := cluster.Management.Core.Secrets("").Controller().Lister()
 	workload := cluster.UserOnlyContext()
 	c := &Controller{
+		ctx:                    ctx,
 		ingressInterface:       workload.Extensions.Ingresses(""),
 		ingressLister:          workload.Extensions.Ingresses("").Controller().Lister(),
 		clusterName:            workload.ClusterName,
@@ -19,6 +20,7 @@ func Register(ctx context.Context, cluster *config.UserContext) {
 	}
 	workload.Extensions.Ingresses("").AddHandler("approuterController", c.sync)
 	n := &NginxIngressController{
+		ctx:               ctx,
 		podLister:         workload.Core.Pods(defaultNginxIngressNamespace).Controller().Lister(),
 		nodeLister:        workload.Core.Nodes("").Controller().Lister(),
 		clusterName:       workload.ClusterName,
