@@ -35,13 +35,20 @@ func (c *Controller) sync(key string, obj *extensionsv1beta1.Ingress) error {
 	}
 
 	_, fqdn, err := c.getSecret()
+
+	logrus.Debugf("=========fqdn========%s",fqdn)
+
 	if k8serrors.IsNotFound(err) {
 		return nil
 	}
 
+	logrus.Debugf("========key========%s======refreshIngressHostnameKey====%s",key,refreshIngressHostnameKey)
+
 	if key == refreshIngressHostnameKey {
+		logrus.Debugf("====aaaaaa====key========%s",key)
 		return c.refreshAll(fqdn)
 	}
+	logrus.Debugf("====bbbbbb====key========%s",key)
 	return c.refresh(fqdn, obj)
 }
 
@@ -59,6 +66,7 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 		fallthrough
 	case ingressClassNginx:
 		targetHostname = c.getRdnsHostname(obj, rootDomain)
+		logrus.Debugf("====targetHostname=======%s",targetHostname)
 	default:
 		return nil
 	}
@@ -68,7 +76,9 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 
 	newObj := obj.DeepCopy()
 	newObj.Annotations[annotationHostname] = targetHostname
+	logrus.Debug("1111111111122222223333333")
 	if _, err := c.ingressInterface.Update(newObj); err != nil {
+		logrus.Debug("2222223333333444444")
 		return err
 	}
 
