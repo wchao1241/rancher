@@ -61,6 +61,8 @@ func (n *NginxIngressController) sync(key string, obj *workloadutil.Workload) er
 		n.ingressController.Enqueue("", refreshIngressHostnameKey)
 		return nil
 	}
+	return nil
+
 }
 
 func (n *NginxIngressController) getNginxControllerIPs() ([]string, error) {
