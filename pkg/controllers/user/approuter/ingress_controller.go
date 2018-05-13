@@ -3,6 +3,7 @@ package approuter
 import (
 	"fmt"
 
+	"github.com/niusmallnan/kube-rdns/setting"
 	"github.com/rancher/rancher/pkg/settings"
 	"github.com/rancher/types/apis/core/v1"
 	"github.com/rancher/types/apis/extensions/v1beta1"
@@ -11,7 +12,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"strings"
-	"github.com/niusmallnan/kube-rdns/setting"
 )
 
 const (
