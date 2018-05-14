@@ -41,11 +41,14 @@ func (n *NginxIngressController) sync(key string, obj *corev1.Pod) error {
 	}
 
 	if !labels.SelectorFromSet(nginxIngressLabels).Matches(labels.Set(obj.Labels)) {
+		logrus.Debugf("=======labels.SelectorFromSet(nginxIngressLabels)=======%s", labels.SelectorFromSet(nginxIngressLabels))
+		logrus.Debugf("====labels.Set(obj.Labels)=====%s", labels.Set(obj.Labels))
 		return nil
 	}
 
 	ips, err := n.getNginxControllerIPs()
 	if err != nil {
+		logrus.Debugf("====ips=====%s", ips[0])
 		return err
 	}
 	if serverURL != n.dnsClient.GetBaseURL() {
