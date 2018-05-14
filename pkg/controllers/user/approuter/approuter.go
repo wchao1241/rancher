@@ -3,7 +3,7 @@ package approuter
 import (
 	"context"
 
-	workloadUtil "github.com/rancher/rancher/pkg/controllers/user/workload"
+	//workloadUtil "github.com/rancher/rancher/pkg/controllers/user/workload"
 	"github.com/rancher/types/config"
 )
 
@@ -27,6 +27,7 @@ func Register(ctx context.Context, cluster *config.UserContext) {
 		dnsClient:         NewClient(secrets, secretLister, workload.ClusterName),
 		ingressController: workload.Extensions.Ingresses("").Controller(),
 	}
-	n.workloadController = workloadUtil.NewWorkloadController(workload, n.sync)
+	//n.workloadController = workloadUtil.NewWorkloadController(workload, n.sync)
+	workload.Core.Pods("ingress-nginx").AddHandler("", n.sync)
 	go n.renew(ctx)
 }
