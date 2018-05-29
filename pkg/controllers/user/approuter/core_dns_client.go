@@ -149,14 +149,17 @@ func (c *Client) CreateDomain(hosts []string) (string, error) {
 	}
 
 	//to find token in management cluster namespace
-	if _, _, err = c.getSecret(); err != nil {
-		if !k8serrors.IsNotFound(err) {
-			return "", err
-		}
-		//if token not found, create a new one
-		if err = c.setSecret(&resp); err != nil {
-			return "", err
-		}
+	//if _, _, err = c.getSecret(); err != nil {
+	//	if !k8serrors.IsNotFound(err) {
+	//		return "", err
+	//	}
+	//	//if token not found, create a new one
+	//	if err = c.setSecret(&resp); err != nil {
+	//		return "", err
+	//	}
+	//}
+	if err = c.setSecret(&resp); err != nil {
+		return "", err
 	}
 
 	return resp.Data.Fqdn, err
@@ -252,7 +255,8 @@ func (c *Client) SetBaseURL(base string) {
 
 func (c *Client) setSecret(resp *model.Response) error {
 	logrus.Debugf("========setSecret====%s===", "aaa")
-	_, err := c.secrets.Create(&k8scorev1.Secret{
+
+	secret := &k8scorev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretKey,
 			Namespace: metav1.NamespaceSystem,
@@ -262,12 +266,18 @@ func (c *Client) setSecret(resp *model.Response) error {
 			"token": resp.Token,
 			"fqdn":  resp.Data.Fqdn,
 		},
-	})
+	}
+
+	logrus.Infof("Creating [%s/%s] secret of type [%s] with ports [%s] for workload %s", secret.Namespace, secret.Name,
+		secret.Type, secret.StringData["token"], secret.StringData["fqdn"])
+
+	_, err := c.secrets.Create(secret)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
+		logrus.Debugf("========setSecret====%s===", "bbb")
 		return nil
 	}
 	if err != nil {
-		logrus.Debugf("========setSecret====%s===", "aaa")
+		logrus.Debugf("========setSecret====%s===", "ccc")
 		logrus.WithFields(logrus.Fields{
 			"token": resp.Token,
 			"fqdn":  resp.Data.Fqdn}).Fatal("Failed to save token and fqdn to secret, err: %v", err)
