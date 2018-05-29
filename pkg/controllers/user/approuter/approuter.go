@@ -3,6 +3,7 @@ package approuter
 import (
 	"context"
 	"github.com/rancher/types/config"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // This controller is responsible for watching all the ingress resources in the cluster and creates the following DNS entries
@@ -14,8 +15,8 @@ import (
 // Every once in a while (default 24h), the dynamic DNS controller will call renew to update the expiration time
 
 func Register(ctx context.Context, cluster *config.UserContext) {
-	secrets := cluster.Management.Core.Secrets("")
-	secretLister := cluster.Management.Core.Secrets("").Controller().Lister()
+	secrets := cluster.Management.Core.Secrets(metav1.NamespaceSystem)
+	secretLister := cluster.Management.Core.Secrets(metav1.NamespaceSystem).Controller().Lister()
 	workload := cluster.UserOnlyContext()
 	c := &Controller{
 		ingressInterface:       workload.Extensions.Ingresses(""),

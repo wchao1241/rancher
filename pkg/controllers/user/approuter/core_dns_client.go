@@ -254,7 +254,7 @@ func (c *Client) setSecret(resp *model.Response) error {
 	_, err := c.secrets.Create(&k8scorev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretKey,
-			Namespace: c.clusterName,
+			Namespace: metav1.NamespaceSystem,
 		},
 		Type: k8scorev1.SecretTypeOpaque,
 		StringData: map[string]string{
