@@ -251,6 +251,7 @@ func (c *Client) SetBaseURL(base string) {
 }
 
 func (c *Client) setSecret(resp *model.Response) error {
+	logrus.Debugf("========setSecret====%s===", "aaa")
 	_, err := c.secrets.Create(&k8scorev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretKey,
@@ -265,12 +266,19 @@ func (c *Client) setSecret(resp *model.Response) error {
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		return nil
 	}
+	if err != nil {
+		logrus.Debugf("========setSecret====%s===", "aaa")
+		logrus.WithFields(logrus.Fields{
+			"token": resp.Token,
+			"fqdn":  resp.Data.Fqdn}).Fatal("Failed to save token and fqdn to secret, err: %v", err)
+	}
 	return err
 }
 
 //getSecret return token and fqdn
 func (c *Client) getSecret() (string, string, error) {
-	sec, err := c.managementSecretLister.Get(c.clusterName, secretKey)
+	//sec, err := c.managementSecretLister.Get(c.clusterName, secretKey)
+	sec, err := c.managementSecretLister.Get(metav1.NamespaceSystem, secretKey)
 	if err != nil {
 		return "", "", err
 	}
