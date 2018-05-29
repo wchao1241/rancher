@@ -279,11 +279,12 @@ func (c *Client) setSecret(resp *model.Response) error {
 func (c *Client) getSecret() (string, string, error) {
 	//sec, err := c.managementSecretLister.Get(c.clusterName, secretKey)
 	sec, err := c.managementSecretLister.Get(metav1.NamespaceSystem, secretKey)
-	logrus.Debugf("========setSecretname====%s===%s", sec.Name, sec.Namespace)
-	logrus.Debugf("========setSecretbbbb====%s===%s", string(sec.Data["fqdn"]), string(sec.Data["token"]))
 	if err != nil {
+		logrus.Debug("========setSecretggg====")
 		return "", "", err
 	}
+	logrus.Debugf("========setSecretname====%s===%s", sec.Name, sec.Namespace)
+	logrus.Debugf("========setSecretbbbb====%s===%s", string(sec.Data["fqdn"]), string(sec.Data["token"]))
 	return string(sec.Data["fqdn"]), string(sec.Data["token"]), nil
 }
 
