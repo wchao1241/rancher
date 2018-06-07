@@ -64,17 +64,23 @@ func (c *Client) do(req *http.Request) (model.Response, error) {
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+	logrus.Info("111---------")
 	if err != nil {
+		logrus.Info("222---------")
 		return data, errors.Wrap(err, "Read response body error")
 	}
-
+	logrus.Info("333---------")
 	err = json.Unmarshal(body, &data)
 	if err != nil {
+		logrus.Info("444---------")
 		return data, errors.Wrap(err, "Decode response error")
 	}
+	logrus.Info("555---------")
 	logrus.Debugf("Got response entry: %+v", data)
 	if code := resp.StatusCode; code < 200 || code > 300 {
+		logrus.Infof("666---code------%d", code)
 		if data.Message != "" {
+			logrus.Infof("777---code------%s", data.Message)
 			return data, errors.Errorf("Got request error: %s", data.Message)
 		}
 	}
@@ -110,7 +116,7 @@ func (c *Client) ApplyDomain(hosts []string) (bool, string, error) {
 }
 
 func (c *Client) GetDomain() (d *model.Domain, err error) {
-	fqdn, token, err := c.getSecret()
+	fqdn, _, err := c.getSecret()
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil, nil
@@ -124,12 +130,15 @@ func (c *Client) GetDomain() (d *model.Domain, err error) {
 		return d, errors.Wrap(err, "GetDomain: failed to build a request")
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s" /*token*/, "avbfdasfda"))
 
 	o, err := c.do(req)
+	logrus.Info("qqqqqqq----")
 	if err != nil {
+		logrus.Info("wwwwww----")
 		return d, errors.Wrap(err, "GetDomain: failed to execute a request")
 	}
+	logrus.Info("eeeeeee----")
 
 	return &o.Data, nil
 }

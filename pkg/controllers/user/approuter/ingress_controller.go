@@ -48,26 +48,20 @@ func (c *Controller) sync(key string, obj *extensionsv1beta1.Ingress) error {
 
 	ipDomain := settings.IngressIPDomain.Get()
 	if ipDomain != RdnsIPDomain {
-		logrus.Info("aaaaaaaaaaa========")
 		return nil
 	}
-	logrus.Info("bbbbbbbbbb========")
 
 	isNeedSync := false
 	for _, rule := range obj.Spec.Rules {
 		if strings.HasSuffix(rule.Host, RdnsIPDomain) {
 			isNeedSync = true
-			logrus.Info("ccccccccccc========")
 			break
 		}
 	}
-	logrus.Info("dddddddddd========")
 
 	if !isNeedSync {
-		logrus.Info("eeeeeee========")
 		return nil
 	}
-	logrus.Info("ffffffff========")
 
 	serverURL := settings.RDNSServerBaseURL.Get()
 	if serverURL == "" {
