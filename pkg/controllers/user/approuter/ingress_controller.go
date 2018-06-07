@@ -43,6 +43,13 @@ func isGeneratedDomain(obj *extensionsv1beta1.Ingress, host, domain string) bool
 }
 
 func (c *Controller) sync(key string, obj *extensionsv1beta1.Ingress) error {
+	ipDomain := settings.IngressIPDomain.Get()
+	if ipDomain != RdnsIPDomain {
+		logrus.Info("aaaaaaaa")
+		return nil
+	}
+	logrus.Info("bbbbbbbb")
+
 	if obj == nil || obj.DeletionTimestamp != nil {
 		return nil
 	}
@@ -103,14 +110,14 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 		return nil
 	}
 
-	ipDomain := settings.IngressIPDomain.Get()
-	if ipDomain == "" {
-		return nil
-	}
+	//ipDomain := settings.IngressIPDomain.Get()
+	//if ipDomain == "" {
+	//	return nil
+	//}
 
 	changed := false
 	for _, rule := range obj.Spec.Rules {
-		if (!isGeneratedDomain(obj, rule.Host, rootDomain) || rule.Host == ipDomain) && ipDomain == RdnsIPDomain {
+		if /*(*/ !isGeneratedDomain(obj, rule.Host, rootDomain) || rule.Host == RdnsIPDomain /*) && ipDomain == RdnsIPDomain*/ {
 			changed = true
 			break
 		}
@@ -126,7 +133,7 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 	// Also need to update rules for hostname when using nginx
 	for i, rule := range newObj.Spec.Rules {
 		logrus.Debugf("Got ingress resource hostname: %s", rule.Host)
-		if strings.HasSuffix(rule.Host, ipDomain) {
+		if strings.HasSuffix(rule.Host, RdnsIPDomain /*ipDomain*/) {
 			newObj.Spec.Rules[i].Host = targetHostname
 		}
 	}
