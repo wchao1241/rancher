@@ -17,7 +17,6 @@ import (
 )
 
 const (
-	//annotationHostname     = "rdns.cattle.io/hostname"
 	annotationIngressClass = "kubernetes.io/ingress.class"
 	ingressClassNginx      = "nginx"
 	RdnsIPDomain           = "lb.rancher.cloud"
@@ -43,16 +42,32 @@ func isGeneratedDomain(obj *extensionsv1beta1.Ingress, host, domain string) bool
 }
 
 func (c *Controller) sync(key string, obj *extensionsv1beta1.Ingress) error {
-	ipDomain := settings.IngressIPDomain.Get()
-	if ipDomain != RdnsIPDomain {
-		logrus.Info("aaaaaaaa")
-		return nil
-	}
-	logrus.Info("bbbbbbbb")
-
 	if obj == nil || obj.DeletionTimestamp != nil {
 		return nil
 	}
+
+	ipDomain := settings.IngressIPDomain.Get()
+	if ipDomain != RdnsIPDomain {
+		logrus.Info("aaaaaaaaaaa========")
+		return nil
+	}
+	logrus.Info("bbbbbbbbbb========")
+
+	isNeedSync := false
+	for _, rule := range obj.Spec.Rules {
+		if strings.HasSuffix(rule.Host, RdnsIPDomain) {
+			isNeedSync = true
+			logrus.Info("ccccccccccc========")
+			break
+		}
+	}
+	logrus.Info("dddddddddd========")
+
+	if !isNeedSync {
+		logrus.Info("eeeeeee========")
+		return nil
+	}
+	logrus.Info("ffffffff========")
 
 	serverURL := settings.RDNSServerBaseURL.Get()
 	if serverURL == "" {
@@ -96,7 +111,6 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 		annotations = make(map[string]string)
 	}
 
-	//hostname := annotations[annotationHostname]
 	targetHostname := ""
 	switch annotations[annotationIngressClass] {
 	case "": // nginx as default
@@ -110,14 +124,9 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 		return nil
 	}
 
-	//ipDomain := settings.IngressIPDomain.Get()
-	//if ipDomain == "" {
-	//	return nil
-	//}
-
 	changed := false
 	for _, rule := range obj.Spec.Rules {
-		if /*(*/ !isGeneratedDomain(obj, rule.Host, rootDomain) || rule.Host == RdnsIPDomain /*) && ipDomain == RdnsIPDomain*/ {
+		if !isGeneratedDomain(obj, rule.Host, rootDomain) || rule.Host == RdnsIPDomain {
 			changed = true
 			break
 		}
@@ -128,12 +137,10 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 	}
 
 	newObj := obj.DeepCopy()
-	//newObj.Annotations[annotationHostname] = targetHostname
-
 	// Also need to update rules for hostname when using nginx
 	for i, rule := range newObj.Spec.Rules {
 		logrus.Debugf("Got ingress resource hostname: %s", rule.Host)
-		if strings.HasSuffix(rule.Host, RdnsIPDomain /*ipDomain*/) {
+		if strings.HasSuffix(rule.Host, RdnsIPDomain) {
 			newObj.Spec.Rules[i].Host = targetHostname
 		}
 	}
