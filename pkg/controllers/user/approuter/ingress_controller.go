@@ -46,11 +46,6 @@ func (c *Controller) sync(key string, obj *extensionsv1beta1.Ingress) error {
 		return nil
 	}
 
-	ipDomain := settings.IngressIPDomain.Get()
-	if ipDomain != RdnsIPDomain {
-		return nil
-	}
-
 	isNeedSync := false
 	for _, rule := range obj.Spec.Rules {
 		if strings.HasSuffix(rule.Host, RdnsIPDomain) {
@@ -120,7 +115,7 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 
 	changed := false
 	for _, rule := range obj.Spec.Rules {
-		if !isGeneratedDomain(obj, rule.Host, rootDomain) || rule.Host == RdnsIPDomain {
+		if !isGeneratedDomain(obj, rule.Host, rootDomain) /* || rule.Host == RdnsIPDomain*/ {
 			changed = true
 			break
 		}

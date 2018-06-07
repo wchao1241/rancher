@@ -18,6 +18,7 @@ import (
 	k8scorev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/rancher/rancher/pkg/settings"
 )
 
 const (
@@ -64,23 +65,17 @@ func (c *Client) do(req *http.Request) (model.Response, error) {
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-	logrus.Info("111---------")
 	if err != nil {
-		logrus.Info("222---------")
 		return data, errors.Wrap(err, "Read response body error")
 	}
-	logrus.Info("333---------")
+
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		logrus.Info("444---------")
 		return data, errors.Wrap(err, "Decode response error")
 	}
-	logrus.Info("555---------")
 	logrus.Debugf("Got response entry: %+v", data)
 	if code := resp.StatusCode; code < 200 || code > 300 {
-		logrus.Infof("666---code------%d", code)
 		if data.Message != "" {
-			logrus.Infof("777---code------%s", data.Message)
 			return data, errors.Errorf("Got request error: %s", data.Message)
 		}
 	}
@@ -96,7 +91,8 @@ func (c *Client) ApplyDomain(hosts []string) (bool, string, error) {
 		return false, "", err
 	}
 
-	if d == nil {
+	ipDomain := settings.IngressIPDomain.Get()
+	if d == nil && ipDomain == RdnsIPDomain {
 		logrus.Debugf("Fqdn configuration does not exist, need to create a new one")
 		fqdn, err := c.CreateDomain(hosts)
 		return true, fqdn, err
@@ -116,7 +112,7 @@ func (c *Client) ApplyDomain(hosts []string) (bool, string, error) {
 }
 
 func (c *Client) GetDomain() (d *model.Domain, err error) {
-	fqdn, _, err := c.getSecret()
+	fqdn, token, err := c.getSecret()
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil, nil
@@ -130,15 +126,12 @@ func (c *Client) GetDomain() (d *model.Domain, err error) {
 		return d, errors.Wrap(err, "GetDomain: failed to build a request")
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s" /*token*/, "avbfdasfda"))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	o, err := c.do(req)
-	logrus.Info("qqqqqqq----")
 	if err != nil {
-		logrus.Info("wwwwww----")
 		return d, errors.Wrap(err, "GetDomain: failed to execute a request")
 	}
-	logrus.Info("eeeeeee----")
 
 	return &o.Data, nil
 }
