@@ -12,13 +12,13 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/rancher/rancher/pkg/settings"
 	"github.com/rancher/rdns-server/model"
 	"github.com/rancher/types/apis/core/v1"
 	"github.com/sirupsen/logrus"
 	k8scorev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/rancher/rancher/pkg/settings"
 )
 
 const (
