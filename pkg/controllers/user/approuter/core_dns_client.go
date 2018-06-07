@@ -104,8 +104,9 @@ func (c *Client) ApplyDomain(hosts []string) (bool, string, error) {
 		return false, fqdn, err
 	}
 	logrus.Debugf("Fqdn %s has no changes, no need to update", d.Fqdn)
+	fqdn, _, _ := c.getSecret()
 
-	return false, "", nil
+	return false, fqdn, nil
 }
 
 func (c *Client) GetDomain() (d *model.Domain, err error) {

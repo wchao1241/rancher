@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	annotationHostname     = "rdns.cattle.io/hostname"
+	//annotationHostname     = "rdns.cattle.io/hostname"
 	annotationIngressClass = "kubernetes.io/ingress.class"
 	ingressClassNginx      = "nginx"
 	RdnsIPDomain           = "lb.rancher.cloud"
@@ -89,7 +89,7 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 		annotations = make(map[string]string)
 	}
 
-	hostname := annotations[annotationHostname]
+	//hostname := annotations[annotationHostname]
 	targetHostname := ""
 	switch annotations[annotationIngressClass] {
 	case "": // nginx as default
@@ -99,7 +99,7 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 	default:
 		return nil
 	}
-	if hostname == targetHostname || targetHostname == "" {
+	if targetHostname == "" {
 		return nil
 	}
 
@@ -121,7 +121,7 @@ func (c *Controller) refresh(rootDomain string, obj *extensionsv1beta1.Ingress) 
 	}
 
 	newObj := obj.DeepCopy()
-	newObj.Annotations[annotationHostname] = targetHostname
+	//newObj.Annotations[annotationHostname] = targetHostname
 
 	// Also need to update rules for hostname when using nginx
 	for i, rule := range newObj.Spec.Rules {
